@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: 
+      - master
+  # 手动触发
+  workflow_dispatch:
+  # 工作
+jobs:
+  # 构建
+  build:
+  # 构建应用使用的系统
+    runs-on: ubuntu-18.04
+
+  # 步骤
+    steps:
+  # 使用 
+    - uses: actions/checkout@v2
+  # 使用的java版本   
+    - name: Use Java
+      uses: actions/setup-java@v1
+      with:
+          java-version: 11
+
+  # 验证 Gradle 包装器 
+    - name: Validate Gradle Wrapper
+      uses: gradle/wrapper-validation-action@v1
+
+  # 构建app
+    - name: Build app
+      run: bash ./gradlew assembleRelease
+
+  #发布构建的app
+    - name: Upload built apk
+      if: success()
+      uses: actions/upload-artifact@v2
+      with:
+          name: Release_${{ env.VERSION }}.apk
+          path: ${{ github.workspace }}/app/build/outputs/apk/release/${{ env.APK_FILE }}
